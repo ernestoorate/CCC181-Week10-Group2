@@ -31,7 +31,7 @@ npm run build        # must finish with no errors before you submit
 
 | Member | Name | GitHub username | CSS file | What I did |
 | --- | --- | --- | --- | --- |
-| 1 (leader) | | | `base.css` | |
+| 1 (leader) | | | `base.css` | ernestoorate | Created base.css by setting up the website's global styles, color scheme, typography, and responsive layout. |
 | 2 | Joevan Lloyd ilustrado | joevanlloydilustrado3136| `nav.css` | Updated nav.css by creating a responsive navbar using Flexbox and a footer using CSS Grid, styling them with the project's color scheme, adding hover and focus effects for accessibility, and implementing 768px and 1024px breakpoints for tablet and desktop layouts.|
 | 3 | Frank Leo Samson | FrankLeoSamson | `form.css` | Styled the login card and form in form.css with Flexbox: stacked 48 px fields and buttons on phone, checkbox row and buttons side by side from 768 px, and a larger card padding from 1024 px. |
 
