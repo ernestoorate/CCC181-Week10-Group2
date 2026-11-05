@@ -23,16 +23,16 @@ npm run build        # must finish with no errors before you submit
 
 | Item | Your answer |
 | --- | --- |
-| Group number | |
-| Section | |
-| Repository URL | |
+| Group number | 2 |
+| Section | IT3-B|
+| Repository URL |https://github.com/ernestoorate/CCC181-Week10-Group2/ |
 
 ## Members (each member fills in their own row in their own commit)
 
 | Member | Name | GitHub username | CSS file | What I did |
 | --- | --- | --- | --- | --- |
 | 1 (leader) | | | `base.css` | |
-| 2 | | | `nav.css` | |
+| 2 | Joevan Lloyd ilustrado| joevanlloydilustrado3136| `nav.css` | Updated nav.css by creating a responsive navbar using Flexbox and a footer using CSS Grid, styling them with the project's color scheme, adding hover and focus effects for accessibility, and implementing 768px and 1024px breakpoints for tablet and desktop layouts.|
 | 3 | | | `form.css` | |
 
 ## Experiment 0: the page without the viewport tag
