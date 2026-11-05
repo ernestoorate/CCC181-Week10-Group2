@@ -40,25 +40,31 @@ npm run build        # must finish with no errors before you submit
 What did the page look like in DevTools phone mode **before** adding the viewport meta tag?
 What changed **after** adding it?
 
-> (write your answer here)
+Before adding the viewport meta tag, the page appeared zoomed out and smaller in phone mode because the browser used a wider default layout viewport. After adding the viewport tag, the page adjusted to the actual screen width, making the content properly sized and easier to view on mobile devices.
 
 ## DevTools test results
 
 | Width | What must be true | Pass? |
 | --- | --- | --- |
-| 360 px | 1 column. Nav links stacked and 48px tall. Options and buttons stacked. Footer in 1 column. No sideways scrollbar. | |
-| 768 px | Nav in one row (brand left, links right). Checkbox and link in one row. Two buttons side by side. | |
-| 1024 px | Brand panel and login card side by side. Footer in 3 columns. Heading is larger. | |
-| 1280 px | Content centered and stops at 1200px. | |
+| 360 px | 1 column. Nav links stacked and 48px tall. Options and buttons stacked. Footer in 1 column. No sideways scrollbar. | Yes |
+| 768 px | Nav in one row (brand left, links right). Checkbox and link in one row. Two buttons side by side. | Yes |
+| 1024 px | Brand panel and login card side by side. Footer in 3 columns. Heading is larger. | Yes |
+| 1280 px | Content centered and stops at 1200px. | Yes 
 
 ### Breakpoints I observed
 
 Using **Show media queries** and dragging slowly from 360 px to 1280 px, the layout changed at these exact widths:
 
-> (write the widths here, and say whether any width looked broken)
+768px – Tablet layout adjustments.
+
+1024px – Brand panel and login card appear side by side.
+
+1280px – Content becomes centered with a maximum width of 1200px.
+
+No broken layouts or sideways scrolling were observed during testing.
 
 Screenshots are in `screenshots/` as `360.png`, `768.png`, `1024.png`, `1280.png`.
 
 ## What our group learned (leader writes this last)
 
-> (write your answer here)
+Our group learned the importance of mobile-first design, responsive breakpoints, and proper viewport settings. We also learned how CSS media queries help create a layout that adjusts to different screen sizes while maintaining readability, accessibility, and consistency.
