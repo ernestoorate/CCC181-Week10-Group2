@@ -1,8 +1,23 @@
-// GIVEN FILE (styled in form.css by Member 3). Do not edit.
-// The sign-in is a DEMO: nothing is sent to a server and nothing is saved.
+// Part 2: the form first runs the Part 1 checks, then asks the API.
+// Success is decided ONLY by the API answering 200 (see src/api/auth.ts).
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import type { LoginErrors, LoginFormValues } from '../types';
+import { AuthError, login } from '../api/auth';
+import type { AuthErrorKind } from '../api/auth';
+import type { LoginErrors, LoginFormValues, LoginResult } from '../types';
+
+const API_MESSAGES: Record<AuthErrorKind, string> = {
+  invalid: 'Wrong email or password.',
+  'bad-request': 'Please enter a valid email and password.',
+  unauthorized: 'Wrong email or password.',
+  network: 'Cannot reach the server. Please try again.',
+  server: 'Something went wrong on our side. Please try again later.',
+};
+
+interface LoginFormProps {
+  onLoggedIn: (result: LoginResult) => void;
+  notice?: string;
+}
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,11 +38,12 @@ function validate(values: LoginFormValues): LoginErrors {
   return errors;
 }
 
-export default function LoginForm() {
+export default function LoginForm({ onLoggedIn, notice }: LoginFormProps) {
   const [values, setValues] = useState<LoginFormValues>(INITIAL_VALUES);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [signedInAs, setSignedInAs] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string>('');
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, type, value, checked } = event.target;
@@ -37,11 +53,25 @@ export default function LoginForm() {
     }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
+
+    // Part 1 checks first: bad input never reaches the API.
     const nextErrors = validate(values);
     setErrors(nextErrors);
-    setSignedInAs(Object.keys(nextErrors).length === 0 ? values.email : null);
+    setApiError('');
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setLoading(true);
+    try {
+      const result = await login(values.email.trim(), values.password);
+      onLoggedIn(result); // only reached after the API answered 200
+    } catch (error) {
+      const kind: AuthErrorKind = error instanceof AuthError ? error.kind : 'server';
+      setApiError(API_MESSAGES[kind]);
+      setLoading(false); // stay on the form; the typed email is kept
+    }
   }
 
   return (
@@ -50,6 +80,12 @@ export default function LoginForm() {
         Sign in
       </h2>
       <p className="login-card__subtitle">Use your school email to continue.</p>
+
+      {(apiError || notice) && (
+        <p className="auth-message auth-message--error" role="alert">
+          {apiError || notice}
+        </p>
+      )}
 
       <form className="login-form" onSubmit={handleSubmit} noValidate>
         <div className="form-field">
@@ -118,16 +154,9 @@ export default function LoginForm() {
           </a>
         </div>
 
-        <button type="submit" className="btn btn--primary">
-          Sign in
+        <button type="submit" className="btn btn--primary" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign in'}
         </button>
-
-        {signedInAs && (
-          <p className="form-success" role="status">
-            Demo only: {signedInAs} would be signed in here. Nothing was sent
-            or saved.
-          </p>
-        )}
       </form>
 
       <div className="login-card__divider">
