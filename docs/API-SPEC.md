@@ -1,50 +1,25 @@
+# CampusConnect API Specification (v1)
 
-# CampusConnect API Specification
+Base URL: `http://localhost:3000/api/v1`
 
-## 1. API Overview
+## 1. Required Auth & Health Endpoints
 
-The CampusConnect API is a REST API developed using Node.js and Express. It handles user authentication and provides access to authenticated user information.
+| Method | Endpoint | Purpose | Success Code | Error Codes |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/health` | Check if the backend server is running | `200 OK` | `500` |
+| `POST` | `/api/v1/sessions` | Authenticate user credentials and return a JWT | `200 OK` | `400`, `401`, `500` |
+| `GET` | `/api/v1/users/me` | Get the profile of the currently signed-in user | `200 OK` | `401`, `500` |
 
-**Base URL:** `http://localhost:3000/api/v1`
-
-**Data Format:** JSON
-
-## 2. API Endpoints
-
-| Method | Endpoint | Purpose | Success | Error |
-|---|---|---|---|---|
-| GET | /health | Check if the API is running | 200 OK | None |
-| POST | /sessions | Authenticate a user and create a login session | 200 OK | 400, 401 |
-| GET | /users/me | Retrieve the currently authenticated user | 200 OK | 401 |
-
-## 3. Endpoint Details
-
-### 3.1 Health Check
-
-**Method:** GET
-
-**Endpoint:** `/api/v1/health`
-
-**Description:** Checks whether the CampusConnect backend API is running.
-
-**Successful Response: 200 OK**
-
+### Health Check — `GET /api/v1/health`
+**Response (`200 OK`):**
 ```json
 {
   "status": "ok"
 }
 ```
 
-### 3.2 User Login
-
-**Method:** POST
-
-**Endpoint:** `/api/v1/sessions`
-
-**Description:** Authenticates a user using their email and password. If the credentials are correct, the API generates a JWT token.
-
+### Sign In — `POST /api/v1/sessions`
 **Request Body:**
-
 ```json
 {
   "email": "student@campusconnect.test",
@@ -52,11 +27,10 @@ The CampusConnect API is a REST API developed using Node.js and Express. It hand
 }
 ```
 
-**Successful Response: 200 OK**
-
+**Response (`200 OK`):**
 ```json
 {
-  "token": "<a long token text>",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": 1,
     "name": "Demo Student",
@@ -65,38 +39,25 @@ The CampusConnect API is a REST API developed using Node.js and Express. It hand
 }
 ```
 
-**Error Response: 400 Bad Request**
+**Error Responses:**
+* **`400 Bad Request`** (missing email or password):
+  ```json
+  {
+    "error": "Email and password are required."
+  }
+  ```
+* **`401 Unauthorized`** (wrong email or password):
+  ```json
+  {
+    "error": "Invalid email or password."
+  }
+  ```
 
-```json
-{
-  "error": "Email and password are required."
-}
-```
-
-**Error Response: 401 Unauthorized**
-
-```json
-{
-  "error": "Invalid email or password."
-}
-```
-
-### 3.3 Get Current User
-
-**Method:** GET
-
-**Endpoint:** `/api/v1/users/me`
-
-**Description:** Retrieves the information of the currently authenticated user. Requires a valid JWT token.
-
+### Current User Profile — `GET /api/v1/users/me`
 **Request Header:**
+`Authorization: Bearer <token>`
 
-```http
-Authorization: Bearer <token>
-```
-
-**Successful Response: 200 OK**
-
+**Response (`200 OK`):**
 ```json
 {
   "id": 1,
@@ -105,206 +66,35 @@ Authorization: Bearer <token>
 }
 ```
 
-**Error Response: 401 Unauthorized**
-
+**Error Response (`401 Unauthorized`):**
 ```json
 {
   "error": "Not logged in."
 }
 ```
 
-## 4. Required Demo Account
+---
 
-| Field | Value |
-|---|---|
-| Email | student@campusconnect.test |
-| Password | Campus26 |
-| Name | Demo Student |
+## Events (design only)
 
-Passwords must be stored as hashed values using bcryptjs. Plain-text passwords must not be stored.
+The following REST endpoints follow Week 12 conventions for managing school events on CampusConnect (designed on paper only; not built in the backend):
 
-## 5. Events API (Design Only)
+| Method | Endpoint | Purpose | Success Code | Error Codes |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/events` | List all campus events | `200 OK` | `500` |
+| `GET` | `/api/v1/events?month=11` | Filter campus events by month (e.g., November) | `200 OK` | `400`, `500` |
+| `GET` | `/api/v1/events/:id` | Get a single campus event by its ID | `200 OK` | `404`, `500` |
+| `POST` | `/api/v1/events` | Add a new campus event | `201 Created` | `400`, `401`, `500` |
+| `PATCH` | `/api/v1/events/:id` | Change part of an existing event (e.g., date or venue) | `200 OK` | `400`, `401`, `404`, `500` |
+| `DELETE` | `/api/v1/events/:id` | Delete a single campus event by its ID | `204 No Content` | `401`, `404`, `500` |
 
-The Events API is designed to manage and retrieve campus events in the CampusConnect application. The following endpoints describe the planned operations. These endpoints are for API design and documentation only and are not required to be implemented in this activity.
-
-### 5.1 Retrieve All Events
-
-**Method:** GET
-
-**Endpoint:** `/api/v1/events`
-
-**Description:** Retrieves the list of available campus events.
-
-**Successful Response: 200 OK**
-
+### Example Event Object (`200 OK` / `201 Created`)
 ```json
 {
-  "events": [
-    {
-      "id": 1,
-      "title": "Campus Orientation",
-      "description": "Orientation for new students",
-      "date": "2026-11-15",
-      "location": "University Campus"
-    }
-  ]
+  "id": 101,
+  "title": "CBIT Tech Week Symposium",
+  "organization": "MSU-Naawan CBIT",
+  "date": "2026-11-20T09:00:00Z",
+  "location": "University Auditorium"
 }
 ```
-
-**Possible Status Codes:**
-- `200 OK` – Events successfully retrieved.
-- `500 Internal Server Error` – Unexpected server error.
-
-### 5.2 Retrieve a Specific Event
-
-**Method:** GET
-
-**Endpoint:** `/api/v1/events/:id`
-
-**Description:** Retrieves the details of a specific event using its ID.
-
-**Example Request:**
-
-`GET /api/v1/events/1`
-
-**Successful Response: 200 OK**
-
-```json
-{
-  "id": 1,
-  "title": "Campus Orientation",
-  "description": "Orientation for new students",
-  "date": "2026-11-15",
-  "location": "University Campus"
-}
-```
-
-**Possible Status Codes:**
-- `200 OK` – Event successfully retrieved.
-- `404 Not Found` – Event does not exist.
-- `500 Internal Server Error` – Unexpected server error.
-
-### 5.3 Create an Event
-
-**Method:** POST
-
-**Endpoint:** `/api/v1/events`
-
-**Description:** Creates a new campus event.
-
-**Request Body:**
-
-```json
-{
-  "title": "Campus Orientation",
-  "description": "Orientation for new students",
-  "date": "2026-11-15",
-  "location": "University Campus"
-}
-```
-
-**Successful Response: 201 Created**
-
-```json
-{
-  "message": "Event created successfully.",
-  "event": {
-    "id": 1,
-    "title": "Campus Orientation",
-    "description": "Orientation for new students",
-    "date": "2026-11-15",
-    "location": "University Campus"
-  }
-}
-```
-
-**Possible Status Codes:**
-- `201 Created` – Event successfully created.
-- `400 Bad Request` – Required event information is missing or invalid.
-- `500 Internal Server Error` – Unexpected server error.
-
-### 5.4 Update an Event
-
-**Method:** PATCH
-
-**Endpoint:** `/api/v1/events/:id`
-
-**Description:** Updates selected information of an existing event.
-
-**Example Request:**
-
-`PATCH /api/v1/events/1`
-
-**Request Body:**
-
-```json
-{
-  "title": "Updated Campus Orientation",
-  "location": "University Gymnasium"
-}
-```
-
-**Successful Response: 200 OK**
-
-```json
-{
-  "message": "Event updated successfully."
-}
-```
-
-**Possible Status Codes:**
-- `200 OK` – Event successfully updated.
-- `400 Bad Request` – Invalid update information.
-- `404 Not Found` – Event does not exist.
-- `500 Internal Server Error` – Unexpected server error.
-
-### 5.5 Delete an Event
-
-**Method:** DELETE
-
-**Endpoint:** `/api/v1/events/:id`
-
-**Description:** Deletes an existing event using its ID.
-
-**Example Request:**
-
-`DELETE /api/v1/events/1`
-
-**Successful Response: 200 OK**
-
-```json
-{
-  "message": "Event deleted successfully."
-}
-```
-
-**Possible Status Codes:**
-- `200 OK` – Event successfully deleted.
-- `404 Not Found` – Event does not exist.
-- `500 Internal Server Error` – Unexpected server error.
-
-### 5.6 Filter Events by Month
-
-**Method:** GET
-
-**Endpoint:** `/api/v1/events?month=11`
-
-**Description:** Retrieves events scheduled within the specified month.
-
-**Example Request:**
-
-`GET /api/v1/events?month=11`
-
-**Successful Response: 200 OK**
-
-```json
-{
-  "events": [
-    {
-      "id": 1,
-      "title": "Campus Orientation",
-      "description": "Orientation for new students",
-      "date": "2026-11-15",
-      "location": "University Campus"
-    }
-  ]
