@@ -126,6 +126,48 @@ app.post("/api/v1/sessions", async (req, res) => {
   }
 });
 
+// === MEMBER 2: Token Middleware & Protected Profile Endpoint ===
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Not logged in." });
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Not logged in." });
+  }
+}
+
+app.get("/api/v1/users/me", authenticateToken, (req, res) => {
+  const userId = req.user.sub || req.user.id;
+  const user = demoUsers.find((u) => u.id === userId);
+  if (!user) {
+    return res.status(401).json({ error: "Not logged in." });
+  }
+  return res.status(200).json({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+  });
+});
+
+// === MEMBER 2: Global 404 & 500 Error Handlers ===
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Not found." });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Something went wrong." });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`API running on http://localhost:${PORT}`);
