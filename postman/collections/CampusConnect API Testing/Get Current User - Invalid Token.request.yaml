@@ -1,0 +1,24 @@
+$kind: http-request
+url: http://localhost:3000/api/v1/users/me
+method: GET
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Invalid token returns 401\", () => {\r
+
+      \    pm.response.to.have.status(401);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Invalid token returns the correct error\", () => {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.error).to.eql(\"Not logged in.\");\r
+
+      });"
+    language: text/javascript
+order: 8000
