@@ -1,0 +1,56 @@
+/* =======================================================================
+   auth.css  |  Part 2: API messages, loading button, Welcome screen
+   Mobile-first: phone styles first, min-width queries only, 48px targets.
+   ======================================================================= */
+
+/* ---- 1. PHONE (no media query) --------------------------------------- */
+
+/* Message above the form (error or info). Long text wraps: no sideways scroll. */
+.auth-message {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  color: var(--muted);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-wrap: anywhere;
+}
+.auth-message--error {
+  color: var(--error);
+  background: #fdecee;
+  border-color: var(--error);
+  font-weight: 600;
+}
+
+/* Sign in button while waiting for the API */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.btn--primary:disabled:hover {
+  background: var(--navy);
+}
+
+/* Welcome screen (reuses .login-card for the box) */
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.welcome-card .login-card__title {
+  overflow-wrap: anywhere;
+}
+.welcome-card__email {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+/* ---- 2. 768px and up (tablets) --------------------------------------- */
+@media (min-width: 768px) {
+  .welcome-card .btn {
+    align-self: flex-start;
+    min-width: 12rem;
+  }
+}
