@@ -1,4 +1,14 @@
-node_modules
-dist
+node_modules/
+dist/
 .DS_Store
 *.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Backend environment variables
+server/.env
+server/.env.*
+!server/.env.example

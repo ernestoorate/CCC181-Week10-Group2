@@ -1,83 +1,91 @@
 import express from "express";
 import cors from "cors";
-import { randomUUID } from "crypto";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
 
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
+
+if (!JWT_SECRET || !CLIENT_ORIGIN) {
+  throw new Error("Missing required environment variables.");
+}
+
+// Middleware
 app.use(cors({
-  origin: "http://localhost:5173"
+  origin: CLIENT_ORIGIN
 }));
 
 app.use(express.json());
 
-// Demo account
-const demoUser = {
-  id: 1,
-  name: "Demo Student",
-  email: "student@campusconnect.test",
-  password: "Campus26"
-};
-
-const sessions = new Map();
+// Demo user with a hashed password
+const users = [
+  {
+    id: 1,
+    name: "Demo Student",
+    email: "student@campusconnect.test",
+    passwordHash: bcrypt.hashSync("Campus26", 10)
+  }
+];
 
 // 1. Health check
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
-    status: "ok",
-    message: "API is running"
+    status: "ok"
   });
 });
 
 // 2. Login API
 app.post("/api/v1/sessions", (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
+  // Validate input
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (
-    email !== demoUser.email ||
-    password !== demoUser.password
-  ) {
+  typeof email !== "string" ||
+  typeof password !== "string" ||
+  !email.trim() ||
+  password.length === 0 ||
+  !emailPattern.test(email.trim())
+) {
+  return res.status(400).json({
+    error: "Email and password are required."
+  });
+}
+  // Find user using lowercase email
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const user = users.find(
+    (u) => u.email.toLowerCase() === normalizedEmail
+  );
+
+  // Check password
+  if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
     return res.status(401).json({
-      message: "Invalid email or password."
+      error: "Invalid email or password."
     });
   }
 
-  const token = randomUUID();
-  sessions.set(token, demoUser.id);
+  // Generate JWT token (expires in 1 hour)
+  const token = jwt.sign(
+    { id: user.id },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
 
-  res.status(200).json({
-    message: "Login successful",
+  // Successful login
+  return res.status(200).json({
     token,
     user: {
-      id: demoUser.id,
-      name: demoUser.name,
-      email: demoUser.email
+      id: user.id,
+      name: user.name,
+      email: user.email
     }
-  });
-});
-
-// 3. Get current user
-app.get("/api/v1/users/me", (req, res) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message: "Unauthorized"
-    });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  if (sessions.get(token) !== demoUser.id) {
-    return res.status(401).json({
-      message: "Invalid or expired session"
-    });
-  }
-
-  res.status(200).json({
-    id: demoUser.id,
-    name: demoUser.name,
-    email: demoUser.email
   });
 });
 
