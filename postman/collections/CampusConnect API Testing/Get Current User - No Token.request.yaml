@@ -1,0 +1,33 @@
+$kind: http-request
+url: http://localhost:3000/api/v1/users/me
+method: GET
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Unauthenticated request returns 401\", () => {\r
+
+      \    pm.response.to.have.status(401);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Unauthenticated request returns the correct error\", () => {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.error).to.eql(\"Not logged in.\");\r
+
+      });"
+    language: text/javascript
+settings:
+  disabledSystemHeaders:
+    - host
+    - user-agent
+    - accept
+    - connection
+    - accept-encoding
+order: 6000

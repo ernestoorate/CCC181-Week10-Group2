@@ -1,0 +1,63 @@
+$kind: http-request
+url: http://localhost:3000/api/v1/sessions
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"email\": \"student@campusconnect.test\",\r
+
+    \  \"password\": \"Campus26\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Login status code is 200\", () => {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Login returns an authentication token\", () => {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.token).to.be.a(\"string\");\r
+
+      \    pm.expect(response.token).to.not.be.empty;\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Login returns the correct user information\", () => {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.user.id).to.eql(1);\r
+
+      \    pm.expect(response.user.name).to.eql(\"Demo Student\");\r
+
+      \    pm.expect(response.user.email).to.eql(\"student@campusconnect.test\");\r
+
+      });\r
+
+      \r
+
+      const response = pm.response.json();\r
+
+      \r
+
+      if (response.token) {\r
+
+      \    pm.collectionVariables.set(\"authToken\", response.token);\r
+
+      }"
+    language: text/javascript
+order: 3000

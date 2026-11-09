@@ -1,0 +1,32 @@
+$kind: http-request
+url: "\thttp://localhost:3000/api/v1/users/me"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{authToken}}"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Authenticated request returns 200\", () => {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Current user information is correct\", () => {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.id).to.eql(1);\r
+
+      \    pm.expect(response.name).to.eql(\"Demo Student\");\r
+
+      \    pm.expect(response.email).to.eql(\"student@campusconnect.test\");\r
+
+      });"
+    language: text/javascript
+order: 7000

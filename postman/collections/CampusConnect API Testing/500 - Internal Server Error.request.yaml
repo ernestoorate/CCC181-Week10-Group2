@@ -1,0 +1,28 @@
+$kind: http-request
+url: http://localhost:3000/api/v1/test-server-error
+method: GET
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Server error returns 500\", () => {\r
+
+      \    pm.response.to.have.status(500);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Server error returns the correct message\", () => {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.error).to.eql(\r
+
+      \        \"Internal server error.\"\r
+
+      \    );\r
+
+      });"
+    language: text/javascript
+order: 10000
